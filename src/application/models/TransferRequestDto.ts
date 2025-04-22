@@ -1,8 +1,8 @@
-import { TxRequestDto } from './TxRequestDto'
 /**
  * DTO for token transfer, includes recipient and token amount
  */
-export interface TransferRequestDto extends TxRequestDto {
+export interface TransferRequestDto {
+  sender: string
   /** Address of the recipient */
   recipient: string
 

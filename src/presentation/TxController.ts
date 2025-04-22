@@ -38,8 +38,8 @@ export class TxController {
    */
   get router(): Router {
     const router = Router()
+    router.get('/:txHash/status', this.getTxStatus.bind(this))
     router.post('/send', this.sendTransaction.bind(this))
-    router.post('/:txHash/status', this.getTxStatus.bind(this))
     router.post('/debug/sign', this.signTransaction.bind(this))
     return router
   }

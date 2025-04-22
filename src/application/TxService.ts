@@ -1,5 +1,6 @@
 import { IViemRepo } from './IViemRepo'
 import { ITxService } from './ITxService'
+import { TxDto } from './models/TxDto'
 
 export class TxService implements ITxService {
   constructor(private viemRepo: IViemRepo) { }
@@ -17,7 +18,7 @@ export class TxService implements ITxService {
     return status
   }
 
-  signTransaction(rawTx: string): Promise<string> {
-    return this.viemRepo.signTransaction(rawTx)
+  signTransaction(tx: TxDto): Promise<string> {
+    return this.viemRepo.signTransaction(tx)
   }
 }

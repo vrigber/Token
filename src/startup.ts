@@ -12,7 +12,11 @@ dotenv.config();
 
 export async function bootstrap() {
   const app = express()
-  const viemRepo = new ViemRepo()
+  
+  const viemRepo = (process.env.RPC_URL && process.env.CHAIN_NAME)
+    ? new ViemRepo(process.env.RPC_URL, process.env.CHAIN_NAME)
+    : new ViemRepo()
+
   const tokenService = new TokenService(viemRepo)
   const txService = new TxService(viemRepo)
   const tokenController = new TokenController(tokenService)
@@ -25,9 +29,10 @@ export async function bootstrap() {
     },
     apis: ['./src/presentation/*.ts']
   })
-  app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+  app.use(express.json())
   app.use('/token', tokenController.router)
   app.use('/tx', txController.router)
+  app.use('/index', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
   ErrorHandler.register(app)
   return app
 }

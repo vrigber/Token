@@ -174,7 +174,6 @@ export class TokenController {
     router.get('/:tokenId', this.getTokenInfo.bind(this))
     router.get('/:tokenId/balance/:userId', this.getUserBalance.bind(this))
     router.post('/:tokenId/transfer', this.transfer.bind(this))
-    router.post('/:tokenId/transfer', this.transfer.bind(this))
     return router
   }
 }

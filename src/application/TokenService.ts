@@ -2,6 +2,7 @@ import { IViemRepo } from './IViemRepo'
 import { TokenInfoResponseDto } from './models/TokenInfoResponseDto'
 import { ITokenService } from './ITokenService'
 import { TransferRequestDto } from './models/TransferRequestDto'
+import { TxDto } from './models/TxDto'
 
 export class TokenService implements ITokenService {
   constructor(private viemRepo: IViemRepo) { }
@@ -25,13 +26,12 @@ export class TokenService implements ITokenService {
   transfer(
     tokenId: string,
     request: TransferRequestDto
-  ): Promise<string> {
-    const { sender, recipient, nonce, tokenValue } = request
+  ): Promise<TxDto> {
+    const { sender, recipient, tokenValue } = request
     const amount = BigInt(tokenValue)
     return this.viemRepo.createTransferTransaction(
       tokenId,
       sender,
-      nonce,
       recipient,
       amount
     )
