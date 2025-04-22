@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction } from 'express'
 import { ITxService } from '../application/ITxService'
 
 export class TxController {
-  constructor(private tokenService: ITxService) {}
+  constructor(private tokenService: ITxService) { }
   async sendTransaction(req: Request, res: Response, next: NextFunction) {
     try {
       const { signedTx } = req.body

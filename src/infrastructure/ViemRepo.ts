@@ -81,7 +81,6 @@ export class ViemRepo implements IViemRepo {
       throw new Error('Chain is not set')
     }
 
-    const chainId = this.client.chain.id;
     const estimatedGas = await this.client.estimateGas({
       account: from,
       to,
@@ -91,14 +90,14 @@ export class ViemRepo implements IViemRepo {
     const gas = estimatedGas / 10n + estimatedGas;
     const maxFeePerGas = parseGwei('20')
     const maxPriorityFeePerGas = parseGwei('2')
-    return { 
-      to, 
+    return {
+      to,
       data,
       nonce: null,
       value: '0',
-      gas: gas.toString(), 
-      maxFeePerGas: maxFeePerGas.toString(), 
-      maxPriorityFeePerGas: maxPriorityFeePerGas.toString() 
+      gas: gas.toString(),
+      maxFeePerGas: maxFeePerGas.toString(),
+      maxPriorityFeePerGas: maxPriorityFeePerGas.toString()
     }
   }
 

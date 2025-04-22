@@ -51,7 +51,7 @@ import { ITokenService } from '../application/ITokenService'
  * Controller for token-related endpoints
  */
 export class TokenController {
-  constructor(private tokenService: ITokenService) {}
+  constructor(private tokenService: ITokenService) { }
 
   /**
    * @openapi
@@ -79,8 +79,8 @@ export class TokenController {
    */
   async getTokenInfo(req: Request, res: Response, next: NextFunction) {
     try {
-      const { tokenId } = req.params
-      const info = await this.tokenService.getTokenInfo(tokenId)
+      const { token } = req.params
+      const info = await this.tokenService.getTokenInfo(token)
       res.json(info)
     } catch (err) {
       next(err)
@@ -119,13 +119,25 @@ export class TokenController {
    */
   async getUserBalance(req: Request, res: Response, next: NextFunction) {
     try {
-      const { tokenId, userId } = req.params
-      const balance = await this.tokenService.getUserBalance(tokenId, userId)
-      res.json({ tokenId, userId, balance })
+      const { token, owner } = req.params
+      const balance = await this.tokenService.getUserBalance(token, owner)
+      res.json({ balance })
     } catch (err) {
       next(err)
     }
-  }/**
+  }
+
+  async getAllowance(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { token, owner, spender } = req.params
+      const allowance = await this.tokenService.getAllowance(token, owner, spender)
+      res.json({ allowance })
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  /**
    * @openapi
    * /tokens/{tokenId}/transfer:
    *   post:
@@ -159,7 +171,7 @@ export class TokenController {
     try {
       const { tokenId } = req.params
       const transferRequest = req.body
-      const rawTx = await this.tokenService.transfer(tokenId,transferRequest)
+      const rawTx = await this.tokenService.transfer(tokenId, transferRequest)
       res.json({ rawTx })
     } catch (err) {
       next(err)
@@ -171,9 +183,10 @@ export class TokenController {
    */
   get router(): Router {
     const router = Router()
-    router.get('/:tokenId', this.getTokenInfo.bind(this))
-    router.get('/:tokenId/balance/:userId', this.getUserBalance.bind(this))
-    router.post('/:tokenId/transfer', this.transfer.bind(this))
+    router.get('/:token', this.getTokenInfo.bind(this))
+    router.get('/:token/balance/:owner', this.getUserBalance.bind(this))
+    router.get('/:token/allowance/:owner/:spender', this.getAllowance.bind(this))
+    router.post('/:token/transfer', this.transfer.bind(this))
     return router
   }
 }

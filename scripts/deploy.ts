@@ -10,7 +10,7 @@ async function main() {
   const [signer] = await ethers.getSigners();
 
   const nonce = await ethers.provider.getTransactionCount(signer.address);
-  const contractAddress = ethers.getCreateAddress({from: signer.address, nonce: nonce}) 
+  const contractAddress = ethers.getCreateAddress({ from: signer.address, nonce: nonce })
   console.log("Contract address will be:", contractAddress, "\n");
 
   const estimatedGas = await signer.estimateGas(tx);
