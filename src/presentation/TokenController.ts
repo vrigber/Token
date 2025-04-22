@@ -2,80 +2,36 @@ import { Router, Request, Response, NextFunction } from 'express'
 import { ITokenService } from '../application/ITokenService'
 
 /**
- * @openapi
- * components:
- *   schemas:
- *     TokenInfoDto:
- *       type: object
- *       properties:
- *         tokenId:
- *           type: string
- *           description: Contract address of the token
- *         name:
- *           type: string
- *           description: Name of the token
- *         symbol:
- *           type: string
- *           description: Symbol of the token
- *         decimals:
- *           type: integer
- *           description: Number of decimal places
- *         totalSupply:
- *           type: string
- *           description: Total token supply as string
- *       required:
- *         - tokenId
- *         - name
- *         - symbol
- *         - decimals
- *         - totalSupply
- *     UserBalanceDto:
- *       type: object
- *       properties:
- *         tokenId:
- *           type: string
- *           description: Contract address of the token
- *         userId:
- *           type: string
- *           description: Address of the user
- *         balance:
- *           type: string
- *           description: User's token balance as string
- *       required:
- *         - tokenId
- *         - userId
- *         - balance
- */
-
-/**
- * Controller for token-related endpoints
+ * @swagger
+ * tags:
+ *   name: Tokens
+ *   description: ERC‑20 token operations
  */
 export class TokenController {
-  constructor(private tokenService: ITokenService) { }
+  constructor(private tokenService: ITokenService) {}
 
   /**
-   * @openapi
-   * /tokens/{tokenId}:
+   * @swagger
+   * /tokens/{token}:
    *   get:
-   *     tags:
-   *       - Tokens
+   *     tags: [Tokens]
    *     summary: Get token information
    *     parameters:
    *       - in: path
-   *         name: tokenId
+   *         name: token
    *         required: true
    *         schema:
    *           type: string
-   *         description: ERC-20 contract address
+   *         description: ERC‑20 contract address
    *     responses:
-   *       '200':
+   *       200:
    *         description: Token information retrieved successfully
    *         content:
    *           application/json:
    *             schema:
    *               $ref: '#/components/schemas/TokenInfoDto'
-   *       '400':
-   *         description: Bad request
+   *       500:
+   *         description: Internal server error
    */
   async getTokenInfo(req: Request, res: Response, next: NextFunction) {
     try {
@@ -88,34 +44,33 @@ export class TokenController {
   }
 
   /**
-   * @openapi
-   * /tokens/{tokenId}/balance/{userId}:
+   * @swagger
+   * /tokens/{token}/balance/{owner}:
    *   get:
-   *     tags:
-   *       - Tokens
+   *     tags: [Tokens]
    *     summary: Get user token balance
    *     parameters:
    *       - in: path
-   *         name: tokenId
+   *         name: token
    *         required: true
    *         schema:
    *           type: string
-   *         description: ERC-20 contract address
+   *         description: ERC‑20 contract address
    *       - in: path
-   *         name: userId
+   *         name: owner
    *         required: true
    *         schema:
    *           type: string
    *         description: Address of the user
    *     responses:
-   *       '200':
+   *       200:
    *         description: User balance retrieved successfully
    *         content:
    *           application/json:
    *             schema:
    *               $ref: '#/components/schemas/UserBalanceDto'
-   *       '400':
-   *         description: Bad request
+   *       500:
+   *         description: Internal server error
    */
   async getUserBalance(req: Request, res: Response, next: NextFunction) {
     try {
@@ -127,6 +82,47 @@ export class TokenController {
     }
   }
 
+  /**
+   * @swagger
+   * /tokens/{token}/allowance/{owner}/{spender}:
+   *   get:
+   *     tags: [Tokens]
+   *     summary: Get allowance for spender
+   *     parameters:
+   *       - in: path
+   *         name: token
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: ERC‑20 contract address
+   *       - in: path
+   *         name: owner
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: Address of the token owner
+   *       - in: path
+   *         name: spender
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: Address of the spender
+   *     responses:
+   *       200:
+   *         description: Allowance retrieved successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 allowance:
+   *                   type: string
+   *                   description: Amount approved for spender
+   *               required:
+   *                 - allowance
+   *       500:
+   *         description: Internal server error
+   */
   async getAllowance(req: Request, res: Response, next: NextFunction) {
     try {
       const { token, owner, spender } = req.params
@@ -138,19 +134,18 @@ export class TokenController {
   }
 
   /**
-   * @openapi
-   * /tokens/{tokenId}/transfer:
+   * @swagger
+   * /tokens/{token}/transfer:
    *   post:
-   *     tags:
-   *       - Tokens
+   *     tags: [Tokens]
    *     summary: Transfer tokens
    *     parameters:
    *       - in: path
-   *         name: tokenId
+   *         name: token
    *         required: true
    *         schema:
    *           type: string
-   *         description: ERC-20 contract address
+   *         description: ERC‑20 contract address
    *     requestBody:
    *       required: true
    *       content:
@@ -158,14 +153,14 @@ export class TokenController {
    *           schema:
    *             $ref: '#/components/schemas/TransferRequestDto'
    *     responses:
-   *       '200':
+   *       200:
    *         description: Transaction submitted successfully
    *         content:
    *           application/json:
    *             schema:
-   *               $ref: '#/components/schemas/TransferResponseDto'
-   *       '400':
-   *         description: Bad request
+   *               $ref: '#/components/schemas/TxDto'
+   *       500:
+   *         description: Internal server error
    */
   async transfer(req: Request, res: Response, next: NextFunction) {
     try {
@@ -178,25 +173,83 @@ export class TokenController {
     }
   }
 
+  /**
+   * @swagger
+   * /tokens/{token}/approve:
+   *   post:
+   *     tags: [Tokens]
+   *     summary: Approve allowance
+   *     parameters:
+   *       - in: path
+   *         name: token
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: ERC‑20 contract address
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/ApproveRequestDto'
+   *     responses:
+   *       200:
+   *         description: Transaction submitted successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/TxDto'
+   *       500:
+   *         description: Internal server error
+   */
   async approve(req: Request, res: Response, next: NextFunction) {
     try {
-      const { token } = req.params;
-      const approveRequest = req.body;
-      const rawTx = await this.tokenService.approve(token, approveRequest);
-      res.json({ rawTx });
+      const { token } = req.params
+      const approveRequest = req.body
+      const rawTx = await this.tokenService.approve(token, approveRequest)
+      res.json({ rawTx })
     } catch (err) {
-      next(err);
+      next(err)
     }
   }
 
+  /**
+   * @swagger
+   * /tokens/{token}/transferFrom:
+   *   post:
+   *     tags: [Tokens]
+   *     summary: Transfer tokens using allowance
+   *     parameters:
+   *       - in: path
+   *         name: token
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: ERC‑20 contract address
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/TransferFromRequestDto'
+   *     responses:
+   *       200:
+   *         description: Transaction submitted successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/TxDto'
+   *       500:
+   *         description: Internal server error
+   */
   async transferFrom(req: Request, res: Response, next: NextFunction) {
     try {
-      const { token } = req.params;
-      const transferFromRequest = req.body;
-      const rawTx = await this.tokenService.transferFrom(token, transferFromRequest);
-      res.json({ rawTx });
+      const { token } = req.params
+      const transferFromRequest = req.body
+      const rawTx = await this.tokenService.transferFrom(token, transferFromRequest)
+      res.json({ rawTx })
     } catch (err) {
-      next(err);
+      next(err)
     }
   }
 

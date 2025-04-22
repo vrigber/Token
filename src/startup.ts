@@ -7,6 +7,7 @@ import { TokenService } from './application/TokenService'
 import { TokenController } from './presentation/TokenController'
 import { TxService } from './application/TxService'
 import { TxController } from './presentation/TxController'
+import { swaggerSpec } from './swagger'
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -22,16 +23,9 @@ export async function bootstrap() {
   const tokenController = new TokenController(tokenService)
   const txController = new TxController(txService)
 
-  const swaggerSpec = swaggerJSDoc({
-    definition: {
-      openapi: '3.0.0',
-      info: { title: 'Token API', version: '1.0.0' },
-    },
-    apis: ['./src/presentation/*.ts']
-  })
   app.use(express.json())
-  app.use('/token', tokenController.router)
-  app.use('/tx', txController.router)
+  app.use('/tokens', tokenController.router)
+  app.use('/transactions', txController.router)
   app.use('/index', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
   ErrorHandler.register(app)
   return app
