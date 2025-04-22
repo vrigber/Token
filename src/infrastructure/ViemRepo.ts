@@ -39,6 +39,19 @@ export class ViemRepo implements IViemRepo {
     })
   }
 
+  fetchAllowance(token: string, owner: string, spender: string): Promise<bigint> {
+    const tokenAddress = this.parseAddress(token)
+    const ownerAddress = this.parseAddress(owner)
+    const spenderAddress = this.parseAddress(spender)
+
+    return this.client.readContract({
+      address: tokenAddress,
+      abi: erc20Abi,
+      functionName: 'allowance',
+      args: [ownerAddress, spenderAddress],
+    })
+  }
+
   async fetchTokenInfo(tokenAddressStr: string): Promise<TokenInfo> {
     const address = this.parseAddress(tokenAddressStr)
     const [name, symbol, totalSupply, decimals] = await Promise.all([
@@ -76,29 +89,35 @@ export class ViemRepo implements IViemRepo {
       functionName: 'transfer',
       args: [recipient, amount],
     })
+    return this.prepareTransaction(from, to, data)
+  }
 
-    if (!this.client.chain) {
-      throw new Error('Chain is not set')
-    }
+  async createApproveTransaction(token: string, sender: string, spender: string, amount: bigint): Promise<TxDto> {
+    const tokenAddress = this.parseAddress(token)
+    const senderAddress = this.parseAddress(sender)
+    const spenderAddress = this.parseAddress(spender)
 
-    const estimatedGas = await this.client.estimateGas({
-      account: from,
-      to,
-      data
+    const data = encodeFunctionData({
+      abi: erc20Abi,
+      functionName: 'approve',
+      args: [spenderAddress, amount],
+    })
+    return this.prepareTransaction(senderAddress, tokenAddress, data)
+  }
+
+  createTransferFromTransaction(token: string, sender: string, payer: string, recipient: string, amount: bigint): Promise<TxDto> {
+    const tokenAddress = this.parseAddress(token)
+    const senderAddress = this.parseAddress(sender)
+    const payerAddress = this.parseAddress(payer)
+    const recipientAddress = this.parseAddress(recipient)
+
+    const data = encodeFunctionData({
+      abi: erc20Abi,
+      functionName: 'transferFrom',
+      args: [payerAddress, recipientAddress, amount],
     })
 
-    const gas = estimatedGas / 10n + estimatedGas;
-    const maxFeePerGas = parseGwei('20')
-    const maxPriorityFeePerGas = parseGwei('2')
-    return {
-      to,
-      data,
-      nonce: null,
-      value: '0',
-      gas: gas.toString(),
-      maxFeePerGas: maxFeePerGas.toString(),
-      maxPriorityFeePerGas: maxPriorityFeePerGas.toString()
-    }
+    return this.prepareTransaction(senderAddress, tokenAddress, data)
   }
 
   async sendSignedTransaction(signedTx: string): Promise<string> {
@@ -114,7 +133,7 @@ export class ViemRepo implements IViemRepo {
 
   async getTxStatus(txHash: string): Promise<string | null> {
     const hash = (
-      txHash
+      txHash.startsWith('0x')
         ? txHash
         : `0x${txHash}`
     ) as Hex
@@ -155,6 +174,31 @@ export class ViemRepo implements IViemRepo {
 
     const signedHex = await walletClient.signTransaction(preparedTx)
     return signedHex
+  }
+
+  private async prepareTransaction(account: `0x${string}`, to: `0x${string}`, data: `0x${string}`): Promise<TxDto> {
+    if (!this.client.chain) {
+      throw new Error('Chain is not set')
+    }
+
+    const estimatedGas = await this.client.estimateGas({
+      account,
+      to,
+      data
+    })
+
+    const gas = estimatedGas / 10n + estimatedGas;
+    const maxFeePerGas = parseGwei('20')
+    const maxPriorityFeePerGas = parseGwei('2')
+    return {
+      to,
+      data,
+      nonce: null,
+      value: '0',
+      gas: gas.toString(),
+      maxFeePerGas: maxFeePerGas.toString(),
+      maxPriorityFeePerGas: maxPriorityFeePerGas.toString()
+    }
   }
 
   private parseAddress(addressStr: string): Address {

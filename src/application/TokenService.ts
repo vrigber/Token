@@ -3,6 +3,8 @@ import { TokenInfoResponseDto } from './models/TokenInfoResponseDto'
 import { ITokenService } from './ITokenService'
 import { TransferRequestDto } from './models/TransferRequestDto'
 import { TxDto } from './models/TxDto'
+import { ApproveRequestDto } from './models/ApproveRequestDto'
+import { TransferFromRequestDto } from './models/TransferFromRequestDto'
 
 export class TokenService implements ITokenService {
   constructor(private viemRepo: IViemRepo) { }
@@ -21,9 +23,10 @@ export class TokenService implements ITokenService {
     const balance = await this.viemRepo.fetchUserBalance(token, owner)
     return balance.toString()
   }
-  
-  getAllowance(token: string, owner: string, spender: string): Promise<string> {
-    throw new Error('Method not implemented.')
+
+  async getAllowance(token: string, owner: string, spender: string): Promise<string> {
+    const allowance = await this.viemRepo.fetchAllowance(token, owner, spender)
+    return allowance.toString()
   }
 
   transfer(
@@ -35,6 +38,28 @@ export class TokenService implements ITokenService {
     return this.viemRepo.createTransferTransaction(
       token,
       sender,
+      recipient,
+      amount
+    )
+  }
+
+  approve(token: string, approveRequest: ApproveRequestDto): Promise<TxDto> {
+    const { sender, spender, tokenValue } = approveRequest
+    const amount = BigInt(tokenValue)
+    return this.viemRepo.createApproveTransaction(
+      token,
+      sender,
+      spender,
+      amount
+    )
+  }
+  transferFrom(token: string, transferFromRequest: TransferFromRequestDto): Promise<TxDto> {
+    const { sender, payer, recipient, tokenValue } = transferFromRequest
+    const amount = BigInt(tokenValue)
+    return this.viemRepo.createTransferFromTransaction(
+      token,
+      sender,
+      payer,
       recipient,
       amount
     )

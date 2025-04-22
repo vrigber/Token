@@ -178,6 +178,28 @@ export class TokenController {
     }
   }
 
+  async approve(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { token } = req.params;
+      const approveRequest = req.body;
+      const rawTx = await this.tokenService.approve(token, approveRequest);
+      res.json({ rawTx });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async transferFrom(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { token } = req.params;
+      const transferFromRequest = req.body;
+      const rawTx = await this.tokenService.transferFrom(token, transferFromRequest);
+      res.json({ rawTx });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   /**
    * Returns configured router for registration
    */
@@ -187,6 +209,8 @@ export class TokenController {
     router.get('/:token/balance/:owner', this.getUserBalance.bind(this))
     router.get('/:token/allowance/:owner/:spender', this.getAllowance.bind(this))
     router.post('/:token/transfer', this.transfer.bind(this))
+    router.post('/:token/approve', this.approve.bind(this));
+    router.post('/:token/transferFrom', this.transferFrom.bind(this));
     return router
   }
 }

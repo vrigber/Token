@@ -12,7 +12,7 @@ dotenv.config();
 
 export async function bootstrap() {
   const app = express()
-  
+
   const viemRepo = (process.env.RPC_URL && process.env.CHAIN_NAME)
     ? new ViemRepo(process.env.RPC_URL, process.env.CHAIN_NAME)
     : new ViemRepo()
