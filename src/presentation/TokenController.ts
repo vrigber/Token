@@ -169,9 +169,9 @@ export class TokenController {
    */
   async transfer(req: Request, res: Response, next: NextFunction) {
     try {
-      const { tokenId } = req.params
+      const { token } = req.params
       const transferRequest = req.body
-      const rawTx = await this.tokenService.transfer(tokenId, transferRequest)
+      const rawTx = await this.tokenService.transfer(token, transferRequest)
       res.json({ rawTx })
     } catch (err) {
       next(err)
@@ -209,8 +209,8 @@ export class TokenController {
     router.get('/:token/balance/:owner', this.getUserBalance.bind(this))
     router.get('/:token/allowance/:owner/:spender', this.getAllowance.bind(this))
     router.post('/:token/transfer', this.transfer.bind(this))
-    router.post('/:token/approve', this.approve.bind(this));
-    router.post('/:token/transferFrom', this.transferFrom.bind(this));
+    router.post('/:token/approve', this.approve.bind(this))
+    router.post('/:token/transferFrom', this.transferFrom.bind(this))
     return router
   }
 }

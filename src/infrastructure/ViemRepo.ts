@@ -5,15 +5,12 @@ import {
   http,
   isAddress,
   encodeFunctionData,
-  serializeTransaction,
-  parseTransaction,
   createWalletClient,
   parseGwei,
   type Address,
   type PublicClient,
   type Chain,
   type Hex,
-  type TransactionRequest
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { erc20Abi } from 'viem'

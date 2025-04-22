@@ -10,12 +10,12 @@ export class TokenService implements ITokenService {
   constructor(private viemRepo: IViemRepo) { }
 
   async getTokenInfo(token: string): Promise<TokenInfoResponseDto> {
-    const raw = await this.viemRepo.fetchTokenInfo(token)
+    const { name, symbol, decimals, totalSupply} = await this.viemRepo.fetchTokenInfo(token)
     return {
-      name: raw.name,
-      symbol: raw.symbol,
-      decimals: raw.decimals,
-      totalSupply: raw.totalSupply.toString(),
+      name,
+      symbol,
+      decimals,
+      totalSupply: totalSupply.toString(),
     }
   }
 
