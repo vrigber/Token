@@ -82,7 +82,7 @@ Once started, the API will listen on `http://localhost:3000`.
 
 ## Error Handling
 
-All error responses return HTTP status ≥ 400 with JSON body:
+All error responses return HTTP status 500 with JSON body:
 
 ```json
 {
