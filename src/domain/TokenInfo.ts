@@ -1,4 +1,4 @@
-export type TokenInfo = {
+export interface TokenInfo {
     name: string
     symbol: string
     totalSupply: bigint

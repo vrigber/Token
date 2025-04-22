@@ -1,9 +1,82 @@
 import { Router, Request, Response, NextFunction } from 'express'
-import { TokenService } from '../application/TokenService'
+import { ITokenService } from '../application/ITokenService'
 
+/**
+ * @openapi
+ * components:
+ *   schemas:
+ *     TokenInfoDto:
+ *       type: object
+ *       properties:
+ *         tokenId:
+ *           type: string
+ *           description: Contract address of the token
+ *         name:
+ *           type: string
+ *           description: Name of the token
+ *         symbol:
+ *           type: string
+ *           description: Symbol of the token
+ *         decimals:
+ *           type: integer
+ *           description: Number of decimal places
+ *         totalSupply:
+ *           type: string
+ *           description: Total token supply as string
+ *       required:
+ *         - tokenId
+ *         - name
+ *         - symbol
+ *         - decimals
+ *         - totalSupply
+ *     UserBalanceDto:
+ *       type: object
+ *       properties:
+ *         tokenId:
+ *           type: string
+ *           description: Contract address of the token
+ *         userId:
+ *           type: string
+ *           description: Address of the user
+ *         balance:
+ *           type: string
+ *           description: User's token balance as string
+ *       required:
+ *         - tokenId
+ *         - userId
+ *         - balance
+ */
+
+/**
+ * Controller for token-related endpoints
+ */
 export class TokenController {
-  constructor(private tokenService: TokenService) {}
+  constructor(private tokenService: ITokenService) {}
 
+  /**
+   * @openapi
+   * /tokens/{tokenId}:
+   *   get:
+   *     tags:
+   *       - Tokens
+   *     summary: Get token information
+   *     parameters:
+   *       - in: path
+   *         name: tokenId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: ERC-20 contract address
+   *     responses:
+   *       '200':
+   *         description: Token information retrieved successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/TokenInfoDto'
+   *       '400':
+   *         description: Bad request
+   */
   async getTokenInfo(req: Request, res: Response, next: NextFunction) {
     try {
       const { tokenId } = req.params
@@ -14,6 +87,36 @@ export class TokenController {
     }
   }
 
+  /**
+   * @openapi
+   * /tokens/{tokenId}/balance/{userId}:
+   *   get:
+   *     tags:
+   *       - Tokens
+   *     summary: Get user token balance
+   *     parameters:
+   *       - in: path
+   *         name: tokenId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: ERC-20 contract address
+   *       - in: path
+   *         name: userId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: Address of the user
+   *     responses:
+   *       '200':
+   *         description: User balance retrieved successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/UserBalanceDto'
+   *       '400':
+   *         description: Bad request
+   */
   async getUserBalance(req: Request, res: Response, next: NextFunction) {
     try {
       const { tokenId, userId } = req.params
@@ -22,12 +125,56 @@ export class TokenController {
     } catch (err) {
       next(err)
     }
+  }/**
+   * @openapi
+   * /tokens/{tokenId}/transfer:
+   *   post:
+   *     tags:
+   *       - Tokens
+   *     summary: Transfer tokens
+   *     parameters:
+   *       - in: path
+   *         name: tokenId
+   *         required: true
+   *         schema:
+   *           type: string
+   *         description: ERC-20 contract address
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             $ref: '#/components/schemas/TransferRequestDto'
+   *     responses:
+   *       '200':
+   *         description: Transaction submitted successfully
+   *         content:
+   *           application/json:
+   *             schema:
+   *               $ref: '#/components/schemas/TransferResponseDto'
+   *       '400':
+   *         description: Bad request
+   */
+  async transfer(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { tokenId } = req.params
+      const transferRequest = req.body
+      const rawTx = await this.tokenService.transfer(tokenId,transferRequest)
+      res.json({ rawTx })
+    } catch (err) {
+      next(err)
+    }
   }
 
+  /**
+   * Returns configured router for registration
+   */
   get router(): Router {
     const router = Router()
     router.get('/:tokenId', this.getTokenInfo.bind(this))
     router.get('/:tokenId/balance/:userId', this.getUserBalance.bind(this))
+    router.post('/:tokenId/transfer', this.transfer.bind(this))
+    router.post('/:tokenId/transfer', this.transfer.bind(this))
     return router
   }
 }

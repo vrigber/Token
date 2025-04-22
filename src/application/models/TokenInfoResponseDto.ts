@@ -1,4 +1,4 @@
-export type TokenInfoDto = {
+export interface TokenInfoResponseDto {
     tokenId: string
     name: string
     symbol: string

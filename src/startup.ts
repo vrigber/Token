@@ -1,17 +1,22 @@
 import express from 'express'
 import swaggerUi from 'swagger-ui-express'
 import swaggerJSDoc from 'swagger-jsdoc'
-import { TokenRepo } from './infrastructure/TokenRepo'
+import { ViemRepo } from './infrastructure/ViemRepo'
 import { ErrorHandler } from './infrastructure/ErrorHandler'
 import { TokenService } from './application/TokenService'
 import { TokenController } from './presentation/TokenController'
-import { routes } from './routes'
+import { TxService } from './application/TxService'
+import { TxController } from './presentation/TxController'
+import dotenv from "dotenv";
+dotenv.config();
 
 export async function bootstrap() {
   const app = express()
-  const tokenRepo = new TokenRepo()
-  const tokenService = new TokenService(tokenRepo)
+  const viemRepo = new ViemRepo()
+  const tokenService = new TokenService(viemRepo)
+  const txService = new TxService(viemRepo)
   const tokenController = new TokenController(tokenService)
+  const txController = new TxController(txService)
 
   const swaggerSpec = swaggerJSDoc({
     definition: {
@@ -20,8 +25,9 @@ export async function bootstrap() {
     },
     apis: ['./src/presentation/*.ts']
   })
-  app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
-  app.use('/users', routes(tokenController))
+  app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+  app.use('/token', tokenController.router)
+  app.use('/tx', txController.router)
   ErrorHandler.register(app)
   return app
 }

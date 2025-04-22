@@ -1,12 +1,13 @@
-import { ITokenRepo } from './ITokenRepo'
-import { TokenInfoDto } from './TokenInfoDto'
+import { IViemRepo } from './IViemRepo'
+import { TokenInfoResponseDto } from './models/TokenInfoResponseDto'
 import { ITokenService } from './ITokenService'
+import { TransferRequestDto } from './models/TransferRequestDto'
 
 export class TokenService implements ITokenService {
-  constructor(private tokenRepo: ITokenRepo) {}
+  constructor(private viemRepo: IViemRepo) { }
 
-  async getTokenInfo(tokenId: string): Promise<TokenInfoDto> {
-    const raw = await this.tokenRepo.fetchTokenInfo(tokenId)
+  async getTokenInfo(tokenId: string): Promise<TokenInfoResponseDto> {
+    const raw = await this.viemRepo.fetchTokenInfo(tokenId)
     return {
       tokenId,
       name: raw.name,
@@ -17,7 +18,22 @@ export class TokenService implements ITokenService {
   }
 
   async getUserBalance(tokenId: string, userId: string): Promise<string> {
-    const balance = await this.tokenRepo.fetchUserBalance(tokenId, userId)
+    const balance = await this.viemRepo.fetchUserBalance(tokenId, userId)
     return balance.toString()
+  }
+
+  transfer(
+    tokenId: string,
+    request: TransferRequestDto
+  ): Promise<string> {
+    const { sender, recipient, nonce, tokenValue } = request
+    const amount = BigInt(tokenValue)
+    return this.viemRepo.createTransferTransaction(
+      tokenId,
+      sender,
+      nonce,
+      recipient,
+      amount
+    )
   }
 }
