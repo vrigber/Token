@@ -68,7 +68,7 @@ npm run build
 node dist/startup.js
 ```
 
-Once started, the API will listen on `http://localhost:3000`.
+**Swagger doc:** `http://localhost:3000/index`
 
 ---
 
